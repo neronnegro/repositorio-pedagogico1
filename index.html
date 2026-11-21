@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Repositorio Pedagógico y Portfolio Digital | Educación Especial</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- QRCode.js para generación de códigos QR en tiempo real en el navegador -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- SheetJS para importar y exportar planillas Excel nativas (.xlsx) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <!-- Canvas Confetti para refuerzo positivo amigable en educación especial -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Fonts: Saira (300, 400, 500, 600, 700) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // Paleta amigable, suave y armónica (fácil de gustar, sin fatiga visual)
+            marino: {
+              DEFAULT: '#24527A',
+              light: '#366A96',
+              dark: '#183854',
+              soft: '#EAF2F8'
+            },
+            menta: {
+              DEFAULT: '#2F855A',
+              light: '#38A169',
+              dark: '#22543D',
+              soft: '#EDF7F1'
+            },
+            ambar: {
+              DEFAULT: '#D97706',
+              light: '#F59E0B',
+              soft: '#FEF3C7'
+            },
+            coral: {
+              DEFAULT: '#D96B43',
+              light: '#E28564',
+              soft: '#FDF2EE'
+            },
+            vainilla: {
+              DEFAULT: '#FAF8F5',
+              card: '#FFFFFF',
+              border: '#E8E2D8',
+              muted: '#F2EDE4'
+            },
+            lavanda: {
+              DEFAULT: '#5D69A6',
+              soft: '#F0F2FA'
+            }
+          },
+          fontFamily: {
+            sans: ['Saira', 'system-ui', 'sans-serif'],
+            saira: ['Saira', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Configuración de fuente Saira en tamaño 12pt como base solicitada */
+    html {
+      font-family: 'Saira', sans-serif;
+      font-size: 12pt;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Saira', sans-serif;
+      font-size: 12pt;
+      line-height: 1.5;
+      background-color: #FAF8F5;
+      color: #2D3748;
+    }
+
+    /* Animaciones suaves */
+    .fade-in {
+      animation: fadeIn 0.25s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilos de impresión académica */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        font-size: 11pt !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body class="bg-vainilla text-slate-800 font-saira min-h-screen flex flex-col selection:bg-marino selection:text-white">
+
+  <!-- ===================================================================== -->
+  <!-- SISTEMA DE NOTIFICACIONES TOAST (NO INTRUSIVO)                        -->
+  <!-- ===================================================================== -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0 no-print"></div>
+
+  <!-- Modal de confirmación reutilizable -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl border border-vainilla-border shadow-xl max-w-md w-full p-6">
+      <h3 id="confirmTitle" class="text-lg font-bold text-marino mb-2">Confirmar acción</h3>
+      <p id="confirmMessage" class="text-slate-600 text-sm mb-6 leading-relaxed">¿Estás seguro de continuar?</p>
+      <div class="flex justify-end gap-3">
+        <button id="confirmCancelBtn" class="px-4 py-2 rounded-xl border border-vainilla-border text-slate-700 font-medium hover:bg-vainilla transition text-sm">
+          Cancelar
+        </button>
+        <button id="confirmAcceptBtn" class="px-4 py-2 rounded-xl bg-coral text-white font-semibold hover:bg-coral-light transition text-sm">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- ENCABEZADO INSTITUCIONAL Y NAVEGACIÓN PRINCIPAL                       -->
+  <!-- Cumple con los 3 ejes del pizarrón: (1) Word / Propuesta, (2) PP /     -->
+  <!-- Presentación, (3) Repositorio Multimedia + Modo Estudiante Atencional  -->
+  <!-- ===================================================================== -->
+  <header class="bg-white border-b border-vainilla-border sticky top-0 z-30 shadow-xs no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        
+        <!-- Identidad Institucional -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-marino text-white flex items-center justify-center shrink-0 shadow-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-bold text-marino tracking-tight leading-tight">
+                Portfolio y Repositorio Pedagógico
+              </h1>
+              <span class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-menta-soft text-menta font-semibold text-[10px]">
+                Educación Especial
+              </span>
+            </div>
+            <p class="text-xs text-slate-500">
+              Escuela Normal Gral. Manuel Belgrano · Profesorado de Educación Especial (2026)
+            </p>
+          </div>
+        </div>
+
+        <!-- Selector de las 3 Secciones del Pizarrón + Modo Estudiante Tadeo -->
+        <nav class="flex items-center flex-wrap gap-1.5 bg-vainilla p-1 rounded-2xl border border-vainilla-border">
+          
+          <!-- (1) Word: Propuesta Pedagógica Curricular -->
+          <button id="navBtnWord" onclick="switchMainView('word')"
+            class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-marino text-white shadow-xs flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>1. Propuesta (Word)</span>
+          </button>
+
+          <!-- (2) P.P.: Presentación Secuencial Interactiva -->
+          <button id="navBtnPP" onclick="switchMainView('pp')"
+            class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-700 hover:bg-white flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-ambar" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+            <span>2. Presentación (P.P.)</span>
+          </button>
+
+          <!-- (3) Repositorio: Imágenes, Videos y Recursos Digitales -->
+          <button id="navBtnRepo" onclick="switchMainView('repo')"
+            class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-700 hover:bg-white flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-lavanda" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>3. Repositorio Multimedia</span>
+          </button>
+
+          <!-- Modo Estudiante (Foco Atencional para Tadeo) -->
+          <button id="navBtnEstudiante" onclick="switchMainView('estudiante')"
+            class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition bg-menta-soft text-menta hover:bg-menta hover:text-white flex items-center gap-1.5 border border-menta/30 shadow-2xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Modo Tadeo</span>
+          </button>
+
+        </nav>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ===================================================================== -->
+    <!-- SECCIÓN 1: PROPUESTA CURRICULAR FORMAL (EQUIVALENTE AL WORD DEL PIZARRÓN) -->
+    <!-- ===================================================================== -->
+    <section id="viewWord" class="fade-in space-y-6">
+
+      <!-- Barra de herramientas de documento -->
+      <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-marino-soft text-marino flex items-center justify-center font-bold text-xs">DOC</span>
+          <div>
+            <h2 class="text-sm font-bold text-marino">Documento Curricular: Propuesta Final</h2>
+            <p class="text-xs text-slate-500">Formato oficial para presentación académica y entrega docente.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Botón de lectura por voz para accesibilidad -->
+          <button onclick="speakPedagogicalSummary()"
+            class="px-3 py-1.5 rounded-xl bg-vainilla hover:bg-marino-soft text-marino border border-vainilla-border text-xs font-semibold transition flex items-center gap-1.5"
+            title="Escuchar resumen de la propuesta con sintetizador de voz">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            <span id="speechBtnText">Escuchar Resumen</span>
+          </button>
+
+          <!-- Exportar a Word (.doc) -->
+          <button onclick="exportToWordDoc()"
+            class="px-3 py-1.5 rounded-xl bg-marino hover:bg-marino-light text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Descargar como Word (.doc)</span>
+          </button>
+
+          <!-- Imprimir / Guardar como PDF -->
+          <button onclick="window.print()"
+            class="px-3 py-1.5 rounded-xl bg-vainilla hover:bg-slate-100 text-slate-700 border border-vainilla-border text-xs font-semibold transition flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>Imprimir / PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenedor del Documento con Diseño Impecable -->
+      <article id="pedagogicalDocContainer" class="bg-white rounded-3xl border border-vainilla-border p-6 sm:p-10 shadow-sm space-y-8">
+        
+        <!-- Portada Académica -->
+        <div class="border-b-2 border-vainilla-border pb-6 text-center space-y-2">
+          <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Escuela Normal Gral. Manuel Belgrano · Año 2026</p>
+          <h1 class="text-xl sm:text-2xl font-bold text-marino">TRABAJO FINAL: PORTFOLIO DIGITAL PEDAGÓGICO</h1>
+          <p class="text-sm font-semibold text-slate-700">Materia: Tecnología Aplicada a la Educación Especial · Curso: 3º Primera</p>
+          <p class="text-xs text-slate-500">Carrera: Profesorado de Educación Especial</p>
+          
+          <div class="flex flex-wrap justify-center gap-6 pt-3 text-xs text-slate-600">
+            <div><strong>Estudiantes:</strong> García, Fabio e Ibáñez, Federico</div>
+            <div><strong>Profesora:</strong> Sánchez, Adriana</div>
+          </div>
+        </div>
+
+        <!-- Bloque 1: Destinatario y Justificación Pedagógica -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-marino text-white text-xs font-bold flex items-center justify-center">1</span>
+            <h2 class="text-base font-bold text-marino">Destinatario y Diagnóstico Psicopedagógico</h2>
+          </div>
+
+          <div class="bg-vainilla rounded-2xl p-5 border border-vainilla-border space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div>
+                <span class="text-slate-500 block">Estudiante:</span>
+                <strong class="text-sm text-slate-800">Tadeo</strong>
+              </div>
+              <div>
+                <span class="text-slate-500 block">Escolaridad:</span>
+                <strong class="text-sm text-slate-800">6.º grado · Nivel Primario</strong>
+              </div>
+              <div>
+                <span class="text-slate-500 block">Diagnóstico:</span>
+                <strong class="text-sm text-coral">Discapacidad intelectual leve</strong>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-vainilla-border text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>
+                <strong>Caracterización del alumno:</strong> El estudiante para el cual están diseñadas las propuestas didácticas es Tadeo. Cursa el 6.º grado de nivel primario y cuenta con diagnóstico de discapacidad intelectual leve.
+              </p>
+              <p>
+                <strong>Necesidades pedagógicas y apoyos requeridos:</strong> A pesar de su condición, Tadeo no tiene necesidades pedagógicas en cuanto al contenido curricular básico. Únicamente requiere <em>apoyos específicos para sostener y reorientar su atención</em>, debido a que suele dispersarse con facilidad ante sobrecarga de estímulos.
+              </p>
+              <div class="bg-white p-3.5 rounded-xl border border-vainilla-border mt-2">
+                <p class="font-bold text-xs text-menta uppercase tracking-wider mb-1">Estrategias DUA (Diseño Universal para el Aprendizaje):</p>
+                <ul class="list-disc list-inside space-y-1 text-xs text-slate-600">
+                  <li>Presentación secuenciada de <strong>una sola actividad a la vez</strong>.</li>
+                  <li>Consignas directas, breves y con apoyo fonético/visual claro.</li>
+                  <li>Pantallas libres de banners o distractores periféricos.</li>
+                  <li>Posibilidad de escaneo inmediato con código QR para trabajar de forma táctil en tablet o celular.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque 2: Tema, Plataformas y Objetivos -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-marino text-white text-xs font-bold flex items-center justify-center">2</span>
+            <h2 class="text-base font-bold text-marino">Marco Curricular, Tema y Aplicaciones Web</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-vainilla rounded-2xl p-5 border border-vainilla-border space-y-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-ambar">Unidad Temática</span>
+              <h3 class="text-sm font-bold text-slate-800">10 de Noviembre – Día de la Tradición</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Fecha conmemorativa en homenaje al nacimiento del escritor y poeta José Hernández (autor de "El Gaucho Martín Fierro"). Se abordan las costumbres, valores y símbolos de la identidad nacional argentina.
+              </p>
+              <div class="pt-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">Aplicaciones Web Utilizadas:</span>
+                <div class="flex gap-2">
+                  <span class="px-2.5 py-1 rounded-lg bg-white border border-vainilla-border text-xs font-semibold text-marino">Wordwall.net</span>
+                  <span class="px-2.5 py-1 rounded-lg bg-white border border-vainilla-border text-xs font-semibold text-lavanda">Canva.com</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-vainilla rounded-2xl p-5 border border-vainilla-border space-y-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-menta">Objetivos Pedagógicos</span>
+              <ul class="space-y-2 text-xs sm:text-sm text-slate-700">
+                <li class="flex items-start gap-2">
+                  <span class="text-menta font-bold text-base leading-none">✓</span>
+                  <span><strong>Identificar</strong> las principales tradiciones y costumbres de Argentina (mate, empanadas, gaucho, vestimenta tradicional, danzas y juegos criollos).</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-menta font-bold text-base leading-none">✓</span>
+                  <span><strong>Reconocer</strong> su importancia cultural como parte del patrimonio vivo de nuestra comunidad.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-menta font-bold text-base leading-none">✓</span>
+                  <span><strong>Promover</strong> la autonomía digital del estudiante a través del acceso accesible y gamificado con códigos QR.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque 3: Secuencia Didáctica de Actividades -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-marino text-white text-xs font-bold flex items-center justify-center">3</span>
+              <h2 class="text-base font-bold text-marino">Planificación y Secuencia Didáctica de Actividades</h2>
+            </div>
+            <span class="text-xs text-slate-500">5 actividades interactivas</span>
+          </div>
+
+          <!-- Tabla curricular de actividades -->
+          <div class="overflow-x-auto rounded-2xl border border-vainilla-border">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-marino-soft text-marino font-bold uppercase tracking-wider text-[11px] border-b border-vainilla-border">
+                <tr>
+                  <th class="py-3 px-3 w-12 text-center">Nº</th>
+                  <th class="py-3 px-4">Actividad y Plataforma</th>
+                  <th class="py-3 px-4">Consigna y Propósito Pedagógico</th>
+                  <th class="py-3 px-4">Apoyo Atencional</th>
+                  <th class="py-3 px-4 text-center">Enlace Directo</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-vainilla-border bg-white text-slate-700">
+                <tr class="hover:bg-vainilla/60 transition">
+                  <td class="py-3.5 px-3 text-center font-bold text-marino">1</td>
+                  <td class="py-3.5 px-4 font-semibold">
+                    <div class="text-slate-800 text-xs sm:text-sm font-bold">Cajas sorpresa de la tradición</div>
+                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded bg-marino-soft text-marino text-[10px]">Wordwall.net</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    Seleccionar una caja misteriosa para descubrir qué elemento tradicional hay en ella.
+                    <span class="block text-slate-500 text-[11px] mt-0.5">Propósito: Recuperación de saberes previos.</span>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    Presentar en pantalla completa, de a una actividad, sin distractores.
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <a href="https://wordwall.net/es/resource/124281495?wwmethod=link" target="_blank" rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-marino text-white hover:bg-marino-light font-semibold text-xs transition">
+                      <span>Jugar</span>
+                      <span>↗</span>
+                    </a>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-vainilla/60 transition">
+                  <td class="py-3.5 px-3 text-center font-bold text-marino">2</td>
+                  <td class="py-3.5 px-4 font-semibold">
+                    <div class="text-slate-800 text-xs sm:text-sm font-bold">¿Cuál sí y cuál no?</div>
+                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded bg-marino-soft text-marino text-[10px]">Wordwall.net</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    Clasificar y agrupar imágenes según si corresponden a una tradición argentina o no.
+                    <span class="block text-slate-500 text-[11px] mt-0.5">Propósito: Discriminación visual y conceptual.</span>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    Consigna breve con apoyo visual directo para focalizar la clasificación.
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <a href="https://wordwall.net/es/resource/124282529?wwmethod=link" target="_blank" rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-marino text-white hover:bg-marino-light font-semibold text-xs transition">
+                      <span>Jugar</span>
+                      <span>↗</span>
+                    </a>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-vainilla/60 transition">
+                  <td class="py-3.5 px-3 text-center font-bold text-marino">3</td>
+                  <td class="py-3.5 px-4 font-semibold">
+                    <div class="text-slate-800 text-xs sm:text-sm font-bold">Sopa tradicional</div>
+                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded bg-marino-soft text-marino text-[10px]">Wordwall.net</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    Encontrar palabras relacionadas al Día de la Tradición en una sopa de letras interactiva.
+                    <span class="block text-slate-500 text-[11px] mt-0.5">Propósito: Afianzamiento de vocabulario con soporte pictográfico.</span>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    Apoyo de pistas visuales para sostener el foco atencional durante la búsqueda.
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <a href="https://wordwall.net/es/resource/124283016?wwmethod=link" target="_blank" rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-marino text-white hover:bg-marino-light font-semibold text-xs transition">
+                      <span>Jugar</span>
+                      <span>↗</span>
+                    </a>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-vainilla/60 transition">
+                  <td class="py-3.5 px-3 text-center font-bold text-marino">4</td>
+                  <td class="py-3.5 px-4 font-semibold">
+                    <div class="text-slate-800 text-xs sm:text-sm font-bold">Cuestionario tradicional</div>
+                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded bg-marino-soft text-marino text-[10px]">Wordwall.net</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    Responder preguntas de opción múltiple sencillas para comprobar la asimilación del tema.
+                    <span class="block text-slate-500 text-[11px] mt-0.5">Propósito: Evaluación formativa y lúdica.</span>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    Preguntas secuenciadas de a una para evitar fatiga cognitiva y sobrecarga atencional.
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <a href="https://wordwall.net/resource/124284632?wwmethod=link" target="_blank" rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-marino text-white hover:bg-marino-light font-semibold text-xs transition">
+                      <span>Jugar</span>
+                      <span>↗</span>
+                    </a>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-vainilla/60 transition">
+                  <td class="py-3.5 px-3 text-center font-bold text-marino">5</td>
+                  <td class="py-3.5 px-4 font-semibold">
+                    <div class="text-slate-800 text-xs sm:text-sm font-bold">Rompecabezas de la tradición</div>
+                    <span class="inline-block mt-0.5 px-2 py-0.5 rounded bg-lavanda-soft text-lavanda text-[10px]">Canva.com</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    Armar un rompecabezas digital con imágenes representativas de la cultura gauchesca.
+                    <span class="block text-slate-500 text-[11px] mt-0.5">Propósito: Cierre motivador, coordinación visomotriz y relax.</span>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600">
+                    Actividad de cierre lúdica con objetivo visual claro e incentivo de logro inmediato.
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <a href="https://canva.link/908qdemw5wnifri" target="_blank" rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-lavanda text-white hover:opacity-90 font-semibold text-xs transition">
+                      <span>Jugar</span>
+                      <span>↗</span>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Conclusión y Criterios de Evaluación Pedagógica -->
+        <div class="bg-vainilla rounded-2xl p-5 border border-vainilla-border space-y-2 text-xs sm:text-sm text-slate-700">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-marino">Criterios de Observación y Seguimiento para Tadeo:</h3>
+          <ul class="list-disc list-inside space-y-1 text-xs text-slate-600">
+            <li>Capacidad de focalización durante el desarrollo de cada micro-actividad (meta: 5 a 8 minutos continuos por juego).</li>
+            <li>Reconocimiento autónomo de los elementos culturales trabajados frente al soporte visual.</li>
+            <li>Nivel de disfrute, motivación intrínseca y autorregulación emocional en el entorno gamificado.</li>
+          </ul>
+        </div>
+
+      </article>
+
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SECCIÓN 2: PRESENTACIÓN INTERACTIVA (P.P. - PRESENTACIÓN PASO A PASO) -->
+    <!-- ===================================================================== -->
+    <section id="viewPP" class="hidden fade-in space-y-6">
+
+      <!-- Barra de control de presentación -->
+      <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-ambar-soft text-ambar flex items-center justify-center font-bold text-xs">P.P.</span>
+          <div>
+            <h2 class="text-sm font-bold text-marino">Modo Presentación (Diapositivas Interactivas)</h2>
+            <p class="text-xs text-slate-500">Diseñado para proyectar en pizarra digital, cañón o trabajar en mesa con pantalla completa.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="toggleFullScreen('slidePresentationCard')"
+            class="px-3.5 py-1.5 rounded-xl border border-vainilla-border bg-vainilla hover:bg-white text-slate-700 text-xs font-semibold transition flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <span>Pantalla Completa</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjeta Principal de la Diapositiva (Estilo Presentación Visual) -->
+      <div id="slidePresentationCard" class="bg-white rounded-3xl border-2 border-vainilla-border p-6 sm:p-10 shadow-md relative min-h-[460px] flex flex-col justify-between">
+        
+        <!-- Contenido dinámico de la diapositiva -->
+        <div id="slideContentArea">
+          <!-- Renderizado dinámicamente por JavaScript -->
+        </div>
+
+        <!-- Barra inferior de navegación de diapositivas -->
+        <div class="pt-6 border-t border-vainilla-border flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+          
+          <!-- Botón Diapositiva Anterior -->
+          <button id="btnSlidePrev" onclick="navigateSlide(-1)"
+            class="w-full sm:w-auto px-5 py-2.5 rounded-2xl border-2 border-vainilla-border hover:border-marino bg-white text-marino font-bold text-sm transition flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Diapositiva Anterior</span>
+          </button>
+
+          <!-- Indicadores de diapositivas y selector numérico -->
+          <div class="flex items-center gap-2" id="slideDotsContainer">
+            <!-- Puntos renderizados por JS -->
+          </div>
+
+          <!-- Botón Siguiente Diapositiva -->
+          <button id="btnSlideNext" onclick="navigateSlide(1)"
+            class="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-marino hover:bg-marino-light text-white font-bold text-sm transition flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none">
+            <span>Siguiente Diapositiva</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SECCIÓN 3: REPOSITORIO DIGITAL MULTIMEDIA (IMÁGENES, VIDEOS, QR, XLSX) -->
+    <!-- ===================================================================== -->
+    <section id="viewRepo" class="hidden fade-in space-y-6">
+
+      <!-- Selector de sub-pestañas del repositorio multimedia -->
+      <div class="flex flex-wrap gap-2 border-b border-vainilla-border pb-3">
+        <button id="repoSubTabBtnImages" onclick="switchRepoSubTab('images')"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-marino text-white shadow-xs flex items-center gap-2">
+          <span>Banco de Imágenes</span>
+          <span class="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px]">6</span>
+        </button>
+        <button id="repoSubTabBtnVideos" onclick="switchRepoSubTab('videos')"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-white text-slate-700 border border-vainilla-border hover:bg-marino-soft flex items-center gap-2">
+          <span>Videoteca Educativa</span>
+          <span class="px-1.5 py-0.5 rounded-full bg-vainilla text-slate-600 text-[10px]">3</span>
+        </button>
+        <button id="repoSubTabBtnQR" onclick="switchRepoSubTab('qr')"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-white text-slate-700 border border-vainilla-border hover:bg-marino-soft flex items-center gap-2">
+          <span>Centro de Códigos QR</span>
+          <span class="px-1.5 py-0.5 rounded-full bg-vainilla text-slate-600 text-[10px]">5</span>
+        </button>
+        <button id="repoSubTabBtnExcel" onclick="switchRepoSubTab('excel')"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-white text-slate-700 border border-vainilla-border hover:bg-marino-soft flex items-center gap-2">
+          <span>Gestión Excel (.xlsx)</span>
+        </button>
+      </div>
+
+      <!-- SUB-PESTAÑA 3.A: BANCO DE IMÁGENES EDUCATIVAS -->
+      <div id="repoSubPanelImages" class="space-y-4">
+        
+        <!-- Encabezado y filtro por secciones curriculares -->
+        <div class="bg-white rounded-2xl border border-vainilla-border p-4 sm:p-5 shadow-xs space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-marino">Banco de Imágenes Pedagógicas por Sección</h3>
+              <p class="text-xs text-slate-500">Apoyos visuales reales seleccionados para cada una de las actividades del Día de la Tradición y la atención de Tadeo.</p>
+            </div>
+            <span class="text-xs font-semibold text-menta bg-menta-soft px-3 py-1 rounded-full self-start sm:self-auto">
+              9 Recursos Visuales Adaptados DUA
+            </span>
+          </div>
+
+          <!-- Filtro interactivo de secciones -->
+          <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-vainilla-border">
+            <span class="text-xs font-bold text-slate-500 mr-1">Filtrar por sección:</span>
+            <button id="imgFilterBtn-all" onclick="filterImagesBySection('all')"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition bg-marino text-white shadow-2xs">
+              Todas las Secciones (9)
+            </button>
+            <button id="imgFilterBtn-costumbres" onclick="filterImagesBySection('costumbres')"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-vainilla border border-vainilla-border text-slate-700 hover:bg-white">
+              Símbolos y Costumbres · Act. 1 y 3 (3)
+            </button>
+            <button id="imgFilterBtn-gastronomia" onclick="filterImagesBySection('gastronomia')"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-vainilla border border-vainilla-border text-slate-700 hover:bg-white">
+              Gastronomía Criolla · Act. 2 (3)
+            </button>
+            <button id="imgFilterBtn-musica_destrezas" onclick="filterImagesBySection('musica_destrezas')"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-vainilla border border-vainilla-border text-slate-700 hover:bg-white">
+              Arte, Música y Destrezas · Act. 4 y 5 (3)
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid de Tarjetas de Imágenes -->
+        <div id="imagesGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Renderizado dinámicamente por JS -->
+        </div>
+
+      </div>
+
+      <!-- SUB-PESTAÑA 3.B: VIDEOTECA EDUCATIVA -->
+      <div id="repoSubPanelVideos" class="space-y-4">
+        <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-marino">Videos Educativos Oficiales del Día de la Tradición</h3>
+            <p class="text-xs text-slate-500">Recursos audiovisuales infantiles de Pakapaka y TICMAS especialmente recomendados para educación especial.</p>
+          </div>
+          <span class="text-xs font-semibold text-menta bg-menta-soft px-3 py-1 rounded-full self-start sm:self-auto">
+            Videos Verificados
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          
+          <!-- Video 1: Zamba con Martín Fierro (Canal Pakapaka Oficial) -->
+          <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col justify-between gap-3">
+            <div class="space-y-2">
+              <div class="relative pb-[56.25%] h-0 rounded-xl overflow-hidden bg-slate-900 border border-vainilla-border">
+                <iframe class="absolute top-0 left-0 w-full h-full"
+                  src="https://www.youtube-nocookie.com/embed/zuvc8AqxhGs"
+                  title="La asombrosa excursión de Zamba con Martín Fierro | Canal Pakapaka"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen></iframe>
+              </div>
+              <h4 class="text-sm font-bold text-marino">Zamba con Martín Fierro (Canal Pakapaka)</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Zamba viaja a la pampa argentina y conoce a Martín Fierro. Aprende sobre las costumbres gauchas, el mate y la vida de campo a través de música y humor.
+              </p>
+            </div>
+            <div class="pt-2 border-t border-vainilla-border flex items-center justify-between">
+              <span class="text-[11px] text-slate-500 font-semibold">Pakapaka · ~14 min</span>
+              <a href="https://www.youtube.com/watch?v=zuvc8AqxhGs" target="_blank" rel="noopener noreferrer"
+                class="px-2.5 py-1 rounded-lg bg-marino-soft hover:bg-marino hover:text-white text-marino text-xs font-semibold transition inline-flex items-center gap-1">
+                <span>Ver en YouTube</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Video 2: Zamba y Martín Fierro: Aventuras en la Pampa -->
+          <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col justify-between gap-3">
+            <div class="space-y-2">
+              <div class="relative pb-[56.25%] h-0 rounded-xl overflow-hidden bg-slate-900 border border-vainilla-border">
+                <iframe class="absolute top-0 left-0 w-full h-full"
+                  src="https://www.youtube-nocookie.com/embed/GhY8i96J_TM"
+                  title="Zamba y Martín Fierro: Aventuras en la Pampa"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen></iframe>
+              </div>
+              <h4 class="text-sm font-bold text-marino">Aventuras en la Pampa (Mundo Zamba)</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Episodio dinámico y musical donde se destacan las destrezas criollas, el caballo, el fogón y las payadas populares.
+              </p>
+            </div>
+            <div class="pt-2 border-t border-vainilla-border flex items-center justify-between">
+              <span class="text-[11px] text-slate-500 font-semibold">Mundo Zamba · ~11 min</span>
+              <a href="https://www.youtube.com/watch?v=GhY8i96J_TM" target="_blank" rel="noopener noreferrer"
+                class="px-2.5 py-1 rounded-lg bg-marino-soft hover:bg-marino hover:text-white text-marino text-xs font-semibold transition inline-flex items-center gap-1">
+                <span>Ver en YouTube</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Video 3: ¿Qué se celebra el Día de la Tradición? (TICMAS Educación) -->
+          <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col justify-between gap-3">
+            <div class="space-y-2">
+              <div class="relative pb-[56.25%] h-0 rounded-xl overflow-hidden bg-slate-900 border border-vainilla-border">
+                <iframe class="absolute top-0 left-0 w-full h-full"
+                  src="https://www.youtube-nocookie.com/embed/ae-jvvY5KCs"
+                  title="10 de Noviembre, Día de la Tradición: ¿Qué se celebra? | TICMAS"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen></iframe>
+              </div>
+              <h4 class="text-sm font-bold text-marino">¿Qué se celebra el 10 de Noviembre? (TICMAS)</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Video educativo breve y didáctico diseñado específicamente para el nivel primario, ideal para la atención sostenida de Tadeo.
+              </p>
+            </div>
+            <div class="pt-2 border-t border-vainilla-border flex items-center justify-between">
+              <span class="text-[11px] text-slate-500 font-semibold">TICMAS · ~2 min</span>
+              <a href="https://www.youtube.com/watch?v=ae-jvvY5KCs" target="_blank" rel="noopener noreferrer"
+                class="px-2.5 py-1 rounded-lg bg-marino-soft hover:bg-marino hover:text-white text-marino text-xs font-semibold transition inline-flex items-center gap-1">
+                <span>Ver en YouTube</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Panel de carga de video personalizado -->
+        <div class="bg-vainilla rounded-2xl border border-vainilla-border p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-marino text-white flex items-center justify-center font-bold text-xs">🎬</span>
+            <div>
+              <p class="text-xs font-bold text-marino">¿Quieres agregar otro video o cambiar alguno?</p>
+              <p class="text-[11px] text-slate-500">Puedes ingresar cualquier enlace o ID de YouTube y verlo aquí mismo.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <input id="customVideoInput" type="text" placeholder="Pega el enlace de YouTube aquí..."
+              class="px-3 py-1.5 rounded-xl border border-vainilla-border bg-white text-xs text-slate-700 w-full sm:w-64 focus:outline-none focus:ring-1 focus:ring-marino" />
+            <button onclick="addCustomVideo()"
+              class="px-3 py-1.5 rounded-xl bg-marino hover:bg-marino-light text-white text-xs font-semibold shrink-0 transition">
+              Cargar
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenedor para videos agregados -->
+        <div id="customVideosContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- SUB-PESTAÑA 3.C: CENTRO DE CÓDIGOS QR INTERACTIVO -->
+      <div id="repoSubPanelQR" class="hidden space-y-4">
+        
+        <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-marino">Códigos QR para Escaneo Rápido con Tablet o Celular</h3>
+            <p class="text-xs text-slate-500">Generados en vivo para cada actividad. Puedes proyectarlos, ampliarlos o descargarlos en formato PNG.</p>
+          </div>
+          <button onclick="downloadAllQRsZipNotice()"
+            class="px-3.5 py-1.5 rounded-xl bg-marino hover:bg-marino-light text-white text-xs font-semibold transition flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>Imprimir Ficha de QRs</span>
+          </button>
+        </div>
+
+        <div id="qrCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Renderizado dinámicamente por JS -->
+        </div>
+
+      </div>
+
+      <!-- SUB-PESTAÑA 3.D: GESTIÓN DE PLANILLAS EXCEL (.XLSX) -->
+      <div id="repoSubPanelExcel" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl border border-vainilla-border p-5 shadow-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-menta-soft text-menta flex items-center justify-center font-bold text-sm">XLSX</span>
+            <div>
+              <h3 class="text-sm font-bold text-marino">Sincronización y Respaldo con Hojas de Cálculo</h3>
+              <p class="text-xs text-slate-500">Compatible con Microsoft Excel (.xlsx) y Google Sheets con hojas de Alumnos, Actividades y Enlaces QR.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <!-- 1. Descargar Respaldo Completo -->
+            <div class="bg-vainilla rounded-2xl p-4 border border-vainilla-border flex flex-col justify-between gap-3">
+              <div class="space-y-1">
+                <h4 class="text-xs font-bold text-marino uppercase tracking-wider">1. Descargar Respaldo</h4>
+                <p class="text-xs text-slate-600">Exporta la totalidad de los datos del alumno y las 5 actividades en un archivo .xlsx nativo.</p>
+              </div>
+              <button onclick="exportDataExcel()"
+                class="w-full py-2 px-3 rounded-xl bg-menta hover:bg-menta-light text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-xs">
+                <span>Exportar Datos (.xlsx)</span>
+              </button>
+            </div>
+
+            <!-- 2. Descargar Plantilla Modelo -->
+            <div class="bg-vainilla rounded-2xl p-4 border border-vainilla-border flex flex-col justify-between gap-3">
+              <div class="space-y-1">
+                <h4 class="text-xs font-bold text-marino uppercase tracking-wider">2. Plantilla Modelo</h4>
+                <p class="text-xs text-slate-600">Descarga una planilla prediseñada para cargar nuevos estudiantes o propuestas temáticas.</p>
+              </div>
+              <button onclick="downloadExcelTemplate()"
+                class="w-full py-2 px-3 rounded-xl border border-vainilla-border bg-white hover:bg-marino-soft text-marino text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                <span>Descargar Plantilla (.xlsx)</span>
+              </button>
+            </div>
+
+            <!-- 3. Importar desde Archivo -->
+            <div class="bg-vainilla rounded-2xl p-4 border border-vainilla-border flex flex-col justify-between gap-3">
+              <div class="space-y-1">
+                <h4 class="text-xs font-bold text-marino uppercase tracking-wider">3. Importar Archivo</h4>
+                <p class="text-xs text-slate-600">Carga un archivo Excel o CSV para actualizar masivamente los perfiles y actividades.</p>
+              </div>
+              <label class="cursor-pointer w-full py-2 px-3 rounded-xl bg-marino hover:bg-marino-light text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-xs text-center">
+                <span>Subir Archivo (.xlsx / .csv)</span>
+                <input type="file" accept=".xlsx,.xls,.csv" onchange="importDataExcel(event)" class="hidden" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SECCIÓN 4: MODO ESTUDIANTE (FOCO ATENCIONAL PARA TADEO)              -->
+    <!-- Una sola actividad por vez, consigna hablada, pantalla limpia, confeti -->
+    <!-- ===================================================================== -->
+    <section id="viewEstudiante" class="hidden fade-in max-w-3xl mx-auto py-2 space-y-6">
+      
+      <!-- Encabezado amigable y motivador -->
+      <div class="bg-white rounded-3xl border-2 border-vainilla-border p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-marino-soft text-marino text-xs font-bold uppercase tracking-wider mb-1">
+            Espacio de Aprendizaje · 10 de Noviembre
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-marino">
+            ¡Hola, Tadeo! 🧉
+          </h2>
+          <p class="text-xs text-slate-500">Vamos a jugar y descubrir nuestras hermosas tradiciones argentinas.</p>
+        </div>
+
+        <!-- Contador grande y claro de actividad -->
+        <div class="bg-vainilla px-4 py-3 rounded-2xl border border-vainilla-border text-center shrink-0">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Actividad</p>
+          <p id="studentStepCounter" class="text-2xl font-bold text-marino">1 de 5</p>
+        </div>
+      </div>
+
+      <!-- Barra de progreso segmentada -->
+      <div id="studentProgressDots" class="flex items-center gap-2 px-1">
+        <!-- Puntos interactivos -->
+      </div>
+
+      <!-- Tarjeta Principal con Foco Atencional (Una a la vez) -->
+      <div id="studentActivityCard" class="bg-white rounded-3xl border-2 border-marino/20 p-6 sm:p-8 shadow-sm space-y-6">
+        <!-- Renderizado dinámicamente -->
+      </div>
+
+      <!-- Botones de navegación grandes y cómodos -->
+      <div class="flex items-center justify-between gap-4 pt-1">
+        <button id="btnStudentPrev" onclick="navigateStudentActivity(-1)"
+          class="flex-1 sm:flex-initial px-6 py-3.5 rounded-2xl bg-white border-2 border-vainilla-border hover:border-marino text-marino font-bold text-base transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span>Actividad Anterior</span>
+        </button>
+
+        <button id="btnStudentNext" onclick="navigateStudentActivity(1)"
+          class="flex-1 sm:flex-initial px-6 py-3.5 rounded-2xl bg-marino hover:bg-marino-light text-white font-bold text-base transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none">
+          <span>Siguiente Actividad</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL PARA VER IMAGEN EN GRANDE (LIGHTBOX CON ACCESIBILIDAD FONÉTICA)  -->
+  <!-- ===================================================================== -->
+  <div id="imageLightboxModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-vainilla-border shadow-2xl max-w-xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span id="lightboxCategory" class="text-[10px] font-bold uppercase tracking-wider text-marino bg-marino-soft px-2.5 py-0.5 rounded-full"></span>
+          <h3 id="lightboxTitle" class="text-base sm:text-lg font-bold text-marino mt-1"></h3>
+          <p id="lightboxSubtitle" class="text-xs text-slate-500 font-semibold"></p>
+        </div>
+        <button onclick="closeImageLightbox()" class="text-slate-400 hover:text-slate-700 font-bold px-2 text-lg">✕</button>
+      </div>
+
+      <div class="bg-vainilla rounded-2xl overflow-hidden border border-vainilla-border flex items-center justify-center min-h-[220px] max-h-[340px]">
+        <img id="lightboxImg" src="" alt="" class="max-h-[320px] w-full object-contain p-2 rounded-2xl" />
+      </div>
+
+      <div class="space-y-2 bg-vainilla p-3.5 rounded-2xl border border-vainilla-border text-xs sm:text-sm">
+        <p id="lightboxDescription" class="text-slate-700 leading-relaxed font-medium"></p>
+        <p id="lightboxTip" class="text-menta font-semibold text-xs border-t border-vainilla-border pt-1.5"></p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-vainilla-border">
+        <button id="lightboxSpeechBtn"
+          class="px-3.5 py-1.5 rounded-xl bg-vainilla border border-vainilla-border hover:bg-white text-marino text-xs font-bold transition flex items-center gap-1.5">
+          <span>🔊 Escuchar Explicación</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <a id="lightboxDownloadBtn" href="" download=""
+            class="px-3.5 py-1.5 rounded-xl bg-marino hover:bg-marino-light text-white text-xs font-semibold transition">
+            Descargar Foto
+          </a>
+          <button onclick="closeImageLightbox()" class="px-4 py-1.5 rounded-xl border border-vainilla-border text-slate-700 text-xs font-semibold hover:bg-vainilla">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL PARA ZOOM Y ESCANEO DE QR                                       -->
+  <!-- ===================================================================== -->
+  <div id="qrZoomModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-vainilla-border shadow-2xl max-w-sm w-full p-6 text-center space-y-4">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-marino bg-marino-soft px-3 py-1 rounded-full">Escaneo Rápido</span>
+        <button onclick="closeQrZoomModal()" class="text-slate-400 hover:text-slate-700 text-base font-bold px-2">✕</button>
+      </div>
+      <h3 id="qrZoomTitle" class="text-base font-bold text-marino leading-snug"></h3>
+      <div id="qrZoomContainer" class="flex justify-center p-4 bg-vainilla rounded-2xl border border-vainilla-border"></div>
+      <p id="qrZoomUrlText" class="text-xs text-slate-500 break-all px-2"></p>
+      <div class="flex gap-2 pt-2">
+        <button id="qrZoomDownloadBtn"
+          class="flex-1 py-2 rounded-xl bg-marino hover:bg-marino-light text-white text-xs font-semibold transition">
+          Descargar PNG
+        </button>
+        <button onclick="closeQrZoomModal()"
+          class="px-4 py-2 rounded-xl border border-vainilla-border text-slate-700 text-xs font-medium hover:bg-vainilla">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- PIE DE PÁGINA ACADÉMICO                                               -->
+  <!-- ===================================================================== -->
+  <footer class="bg-white border-t border-vainilla-border mt-12 py-5 px-4 text-center text-xs text-slate-500 no-print">
+    <div class="max-w-7xl mx-auto space-y-1">
+      <p class="font-semibold text-marino">
+        Trabajo Final · Tecnología Aplicada a la Educación Especial (3.º Primera)
+      </p>
+      <p>
+        Estudiantes: <strong>Fabio García</strong> y <strong>Federico Ibáñez</strong> · Profesora: <strong>Adriana Sánchez</strong> · Escuela Normal Gral. Manuel Belgrano (2026)
+      </p>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA DE APLICACIÓN COMPLETA (JAVASCRIPT)                            -->
+  <!-- ===================================================================== -->
+  <script>
+    // Base de datos de actividades del trabajo final
+    const ACTIVITIES_DATA = [
+      {
+        id: 'ACT-01',
+        order: 1,
+        title: 'Cajas sorpresa de la tradición',
+        platform: 'Wordwall.net',
+        url: 'https://wordwall.net/es/resource/124281495?wwmethod=link',
+        description: 'Toca o haz clic en una caja misteriosa para descubrir qué elemento tradicional argentino hay adentro.',
+        pedagogicalAim: 'Refrescar conocimientos previos y activar la curiosidad.',
+        attentionSupport: 'Presentación limpia, de a una actividad, sin distractores auditivos innecesarios.',
+        icon: '🎁',
+        status: 'Pendiente'
+      },
+      {
+        id: 'ACT-02',
+        order: 2,
+        title: '¿Cuál sí y cuál no?',
+        platform: 'Wordwall.net',
+        url: 'https://wordwall.net/es/resource/124282529?wwmethod=link',
+        description: 'Mira bien cada dibujo y clasifícalo: ¿Es una tradición de nuestro país (Sí) o no lo es (No)?',
+        pedagogicalAim: 'Favorecer la clasificación y discriminación visual.',
+        attentionSupport: 'Consigna muy corta y apoyo visual directo para focalizar.',
+        icon: '⚖️',
+        status: 'Pendiente'
+      },
+      {
+        id: 'ACT-03',
+        order: 3,
+        title: 'Sopa tradicional',
+        platform: 'Wordwall.net',
+        url: 'https://wordwall.net/es/resource/124283016?wwmethod=link',
+        description: 'Busca y encuentra las palabras del Día de la Tradición en la sopa de letras guiándote con los dibujos.',
+        pedagogicalAim: 'Afianzar vocabulario cultural con soporte gráfico.',
+        attentionSupport: 'Pistas visuales permanentes para no perder el foco de búsqueda.',
+        icon: '🔤',
+        status: 'Pendiente'
+      },
+      {
+        id: 'ACT-04',
+        order: 4,
+        title: 'Cuestionario tradicional',
+        platform: 'Wordwall.net',
+        url: 'https://wordwall.net/resource/124284632?wwmethod=link',
+        description: 'Responde las preguntas eligiendo la respuesta correcta para ver cuánto aprendiste.',
+        pedagogicalAim: 'Evaluación formativa del aprendizaje de forma lúdica.',
+        attentionSupport: 'Preguntas secuenciadas de a una sola en pantalla.',
+        icon: '❓',
+        status: 'Pendiente'
+      },
+      {
+        id: 'ACT-05',
+        order: 5,
+        title: 'Rompecabezas de la tradición',
+        platform: 'Canva.com',
+        url: 'https://canva.link/908qdemw5wnifri',
+        description: 'Une las piezas del rompecabezas para armar la imagen criolla completa.',
+        pedagogicalAim: 'Cierre de secuencia, coordinación óculo-manual y refuerzo motivacional.',
+        attentionSupport: 'Meta visual concreta con gratificación inmediata al terminar.',
+        icon: '🧩',
+        status: 'Pendiente'
+      }
+    ];
+
+    // Banco de imágenes pedagógicas organizadas por sección y vinculadas a las actividades
+    const IMAGES_DATA = [
+      // SECCIÓN 1: Símbolos y Costumbres Criollas (Actividades 1 y 3)
+      {
+        id: 'IMG-01',
+        section: 'costumbres',
+        sectionName: 'Símbolos y Costumbres',
+        linkedActivity: 'Act. 1 (Cajas) y Act. 3 (Sopa)',
+        title: 'El Mate y la Rueda de Amigos',
+        subtitle: 'Símbolo nacional de unión y amistad',
+        src: 'assets/images/mate.jpg',
+        description: 'Infusión tradicional argentina preparada con hojas de yerba mate en una calabaza y tomada con bombilla. Representa compartir la palabra, la hospitalidad y el diálogo en comunidad.',
+        pedagogicalTip: 'Apoyo visual para reconocer el mate en la caja sorpresa (Actividad 1) y buscar la palabra "MATE" en la sopa de letras (Actividad 3).'
+      },
+      {
+        id: 'IMG-02',
+        section: 'costumbres',
+        sectionName: 'Símbolos y Costumbres',
+        linkedActivity: 'Act. 1 (Cajas) y Act. 4 (Cuestionario)',
+        title: 'El Gaucho Argentino y sus Pilchas',
+        subtitle: 'Figura emblemática de nuestra identidad nacional',
+        src: 'assets/images/gaucho.jpg',
+        description: 'Hombre de campo caracterizado por sus prendas típicas: sombrero de ala ancha, pañuelo criollo al cuello, chaleco, faja o rastra con monedas y bombachas de campo.',
+        pedagogicalTip: 'Facilita a Tadeo la identificación de la vestimenta criolla típica frente a ropa moderna.'
+      },
+      {
+        id: 'IMG-03',
+        section: 'costumbres',
+        sectionName: 'Símbolos y Costumbres',
+        linkedActivity: 'Act. 1 y Act. 2 (¿Cuál sí y cuál no?)',
+        title: 'El Poncho Criollo Tradicional',
+        subtitle: 'Prenda artesanal de abrigo y pertenencia',
+        src: 'assets/images/poncho.jpg',
+        description: 'Prenda tejida en telar artesanal que abriga al gaucho contra el viento y la lluvia pampeana. Cada provincia tiene colores y guardas emblemáticas que la identifican.',
+        pedagogicalTip: 'Fomenta la discriminación visual de texturas, guardas criollas y colores tradicionales.'
+      },
+
+      // SECCIÓN 2: Gastronomía Criolla (Actividad 2 y Actividad 4)
+      {
+        id: 'IMG-04',
+        section: 'gastronomia',
+        sectionName: 'Gastronomía Tradicional',
+        linkedActivity: 'Act. 2 (¿Cuál sí y cuál no?)',
+        title: 'Empanadas Criollas al Horno',
+        subtitle: 'Comida típica con repulgue artesanal',
+        src: 'assets/images/empanadas.jpg',
+        description: 'Masa casera rellena de carne picada a cuchillo, cebolla, huevo y condimentos patrios, cocinada en horno de barro o frita con su característico repulgue tradicional.',
+        pedagogicalTip: 'Permite clasificar alimentos típicos de nuestras tradiciones frente a comidas de origen foráneo.'
+      },
+      {
+        id: 'IMG-05',
+        section: 'gastronomia',
+        sectionName: 'Gastronomía Tradicional',
+        linkedActivity: 'Act. 2 y Act. 3 (Sopa tradicional)',
+        title: 'El Asado Criollo en el Fogón',
+        subtitle: 'Costumbre culinaria de reunión y encuentro familiar',
+        src: 'assets/images/asado.jpg',
+        description: 'Cocción lenta de carne vacuna sobre brasas de leña al aire libre. Es el momento de encuentro por excelencia de la mesa y la familia argentina.',
+        pedagogicalTip: 'Asociar el concepto de tradición con las reuniones familiares y los días festivos.'
+      },
+      {
+        id: 'IMG-06',
+        section: 'gastronomia',
+        sectionName: 'Gastronomía Tradicional',
+        linkedActivity: 'Act. 2 (¿Cuál sí y cuál no?)',
+        title: 'Pastelitos Criollos Hojaldrados',
+        subtitle: 'Dulce tradicional patrio con membrillo o batata',
+        src: 'assets/images/pastelitos.jpg',
+        description: 'Delicada masa hojaldrada frita en forma de flor o estrella, rellena de dulce de membrillo o batata, bañada con almíbar tibio y decorada con granas de colores.',
+        pedagogicalTip: 'Reconocer los sabores y recetas típicas de los festejos escolares y actos de la tradición.'
+      },
+
+      // SECCIÓN 3: Arte, Música y Destrezas (Actividades 4 y 5)
+      {
+        id: 'IMG-07',
+        section: 'musica_destrezas',
+        sectionName: 'Arte, Música y Destrezas',
+        linkedActivity: 'Act. 4 (Cuestionario) y Act. 5',
+        title: 'La Guitarra Criolla y la Payada',
+        subtitle: 'Instrumento del cancionero popular y el Martín Fierro',
+        src: 'assets/images/guitarra.jpg',
+        description: 'Instrumento musical infaltable en el fogón para acompañar milongas, zambas y payadas improvisadas, inspiradas en los versos inmortales de José Hernández.',
+        pedagogicalTip: 'Vincular el instrumento con la figura de José Hernández y los versos del Martín Fierro.'
+      },
+      {
+        id: 'IMG-08',
+        section: 'musica_destrezas',
+        sectionName: 'Arte, Música y Destrezas',
+        linkedActivity: 'Act. 1, Act. 3 y Act. 5 (Rompecabezas)',
+        title: 'El Caballo Criollo en el Campo',
+        subtitle: 'Compañero leal y noble en la faena rural',
+        src: 'assets/images/caballo.jpg',
+        description: 'Raza equina fuerte, inteligente y resistente adaptada a la geografía argentina, fundamental para las tareas de pastoreo y las jineteadas criollas.',
+        pedagogicalTip: 'Soporte visual directo para resolver el rompecabezas de Canva en la Actividad 5.'
+      },
+      {
+        id: 'IMG-09',
+        section: 'musica_destrezas',
+        sectionName: 'Arte, Música y Destrezas',
+        linkedActivity: 'Act. 4 (Cuestionario) y Act. 5',
+        title: 'Danzas Folclóricas y Pañuelos',
+        subtitle: 'Chacarera, Zamba y Gato en patios de tierra',
+        src: 'assets/images/folclore.jpg',
+        description: 'Bailes populares argentinos en parejas sueltas con pañuelos blancos al viento, zapateo del varón y zarandeo de la mujer al compás del bombo legüero.',
+        pedagogicalTip: 'Favorecer la motricidad rítmica, la memoria corporal y el reconocimiento de danzas tradicionales.'
+      }
+    ];
+
+    // Diapositivas para la vista P.P. (Presentación)
+    const SLIDES_DATA = [
+      {
+        type: 'intro',
+        title: '10 de Noviembre: Día de la Tradición',
+        subtitle: 'Propuesta Didáctica Gamificada para Tadeo',
+        description: 'Secuencia interactiva de 5 propuestas pedagógicas en Wordwall.net y Canva.com, secuenciadas paso a paso para favorecer la atención sostenida.',
+        badge: 'Presentación del Trabajo Final',
+        platform: 'Escuela Normal Gral. Manuel Belgrano'
+      },
+      ...ACTIVITIES_DATA.map((act) => ({
+        type: 'activity',
+        ...act
+      }))
+    ];
+
+    // Estados de navegación
+    let currentMainView = 'word'; // 'word' | 'pp' | 'repo' | 'estudiante'
+    let currentSlideIndex = 0;
+    let currentStudentActivityIndex = 0;
+    let currentRepoSubTab = 'images';
+
+    // =========================================================================
+    // NAVEGACIÓN PRINCIPAL ENTRE LAS 3 SECCIONES DEL PIZARRÓN + MODO TADEO
+    // =========================================================================
+    function switchMainView(view) {
+      currentMainView = view;
+
+      const views = {
+        word: document.getElementById('viewWord'),
+        pp: document.getElementById('viewPP'),
+        repo: document.getElementById('viewRepo'),
+        estudiante: document.getElementById('viewEstudiante')
+      };
+
+      const buttons = {
+        word: document.getElementById('navBtnWord'),
+        pp: document.getElementById('navBtnPP'),
+        repo: document.getElementById('navBtnRepo'),
+        estudiante: document.getElementById('navBtnEstudiante')
+      };
+
+      Object.keys(views).forEach(k => {
+        if (k === view) {
+          views[k].classList.remove('hidden');
+          if (k === 'estudiante') {
+            buttons[k].className = 'px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition bg-menta text-white shadow-xs flex items-center gap-1.5';
+          } else {
+            buttons[k].className = 'px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-marino text-white shadow-xs flex items-center gap-1.5';
+          }
+        } else {
+          views[k].classList.add('hidden');
+          if (k === 'estudiante') {
+            buttons[k].className = 'px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition bg-menta-soft text-menta hover:bg-menta hover:text-white flex items-center gap-1.5 border border-menta/30 shadow-2xs';
+          } else {
+            buttons[k].className = 'px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-700 hover:bg-white flex items-center gap-1.5';
+          }
+        }
+      });
+
+      if (view === 'pp') renderCurrentSlide();
+      if (view === 'repo') renderRepoContent();
+      if (view === 'estudiante') renderStudentFocusMode();
+    }
+
+    // =========================================================================
+    // (2) P.P. - PRESENTACIÓN INTERACTIVA PASO A PASO
+    // =========================================================================
+    function renderCurrentSlide() {
+      const slide = SLIDES_DATA[currentSlideIndex];
+      const area = document.getElementById('slideContentArea');
+      const dotsContainer = document.getElementById('slideDotsContainer');
+
+      // Botones anterior/siguiente
+      document.getElementById('btnSlidePrev').disabled = currentSlideIndex === 0;
+      document.getElementById('btnSlideNext').disabled = currentSlideIndex === SLIDES_DATA.length - 1;
+
+      // Puntos indicadores
+      dotsContainer.innerHTML = SLIDES_DATA.map((s, idx) => `
+        <button onclick="jumpToSlide(${idx})"
+          title="${s.title}"
+          class="h-3 rounded-full transition-all ${idx === currentSlideIndex ? 'w-8 bg-marino' : 'w-3 bg-vainilla-border hover:bg-slate-400'}">
+        </button>
+      `).join('');
+
+      if (slide.type === 'intro') {
+        area.innerHTML = `
+          <div class="text-center py-6 sm:py-10 space-y-4 max-w-2xl mx-auto">
+            <span class="inline-block px-3.5 py-1 rounded-full bg-marino-soft text-marino text-xs font-bold uppercase tracking-wider">
+              ${escapeHTML(slide.badge)}
+            </span>
+            <h2 class="text-2xl sm:text-4xl font-bold text-marino leading-tight">
+              ${escapeHTML(slide.title)}
+            </h2>
+            <p class="text-base sm:text-lg font-semibold text-slate-700">
+              ${escapeHTML(slide.subtitle)}
+            </p>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed bg-vainilla p-4 rounded-2xl border border-vainilla-border">
+              ${escapeHTML(slide.description)}
+            </p>
+            <div class="pt-4 flex flex-wrap justify-center gap-3">
+              <button onclick="navigateSlide(1)"
+                class="px-6 py-3 rounded-2xl bg-marino hover:bg-marino-light text-white font-bold text-sm shadow-xs transition flex items-center gap-2">
+                <span>Comenzar Secuencia Didáctica</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        const qrId = `pp-slide-qr-${slide.id}`;
+        area.innerHTML = `
+          <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8 py-2">
+            
+            <div class="space-y-4 flex-1 text-center lg:text-left">
+              <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <span class="px-3 py-1 rounded-full bg-marino text-white text-xs font-bold">
+                  Actividad ${slide.order} de 5
+                </span>
+                <span class="px-3 py-1 rounded-full bg-vainilla border border-vainilla-border text-marino text-xs font-semibold">
+                  ${escapeHTML(slide.platform)}
+                </span>
+                <span class="text-2xl">${slide.icon || '🎯'}</span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-bold text-marino leading-snug">
+                ${escapeHTML(slide.title)}
+              </h2>
+
+              <div class="bg-vainilla rounded-2xl p-4 sm:p-5 border border-vainilla-border space-y-2">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Consigna para Tadeo:</p>
+                <p class="text-base sm:text-lg text-slate-800 font-medium leading-relaxed">
+                  "${escapeHTML(slide.description)}"
+                </p>
+              </div>
+
+              <div class="bg-menta-soft rounded-2xl p-4 border border-menta/20 text-xs sm:text-sm text-menta-dark space-y-1">
+                <p><strong>Propósito Pedagógico:</strong> ${escapeHTML(slide.pedagogicalAim)}</p>
+                <p><strong>Apoyo Atencional DUA:</strong> ${escapeHTML(slide.attentionSupport)}</p>
+              </div>
+
+              <div class="pt-2 flex flex-wrap gap-3 justify-center lg:justify-start">
+                <a href="${escapeHTML(slide.url)}" target="_blank" rel="noopener noreferrer"
+                  class="px-6 py-3 rounded-2xl bg-marino hover:bg-marino-light text-white font-bold text-sm shadow-xs transition inline-flex items-center gap-2">
+                  <span>Abrir Juego en Pantalla Completa</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+
+                <button onclick="speakText('${escapeHTML(slide.description)}')"
+                  class="px-4 py-3 rounded-2xl border border-vainilla-border bg-vainilla hover:bg-white text-marino text-xs font-bold transition flex items-center gap-1.5"
+                  title="Escuchar consigna hablada">
+                  <span>🔊 Escuchar Consigna</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Código QR grande en la diapositiva -->
+            <div class="bg-vainilla rounded-2xl border border-vainilla-border p-5 flex flex-col items-center text-center shrink-0 w-full sm:w-64">
+              <span class="text-xs font-bold uppercase tracking-wider text-marino mb-2">Escanear para Jugar</span>
+              <div id="${qrId}" class="p-3 bg-white rounded-xl border border-vainilla-border shadow-xs flex items-center justify-center min-h-[176px] min-w-[176px]"></div>
+              <p class="text-xs text-slate-500 mt-2">Tablet o Celular de Tadeo</p>
+            </div>
+
+          </div>
+        `;
+
+        setTimeout(() => {
+          const el = document.getElementById(qrId);
+          if (el) renderQRCodeInto(el, slide.url, 150);
+        }, 10);
+      }
+    }
+
+    function navigateSlide(step) {
+      currentSlideIndex += step;
+      if (currentSlideIndex < 0) currentSlideIndex = 0;
+      if (currentSlideIndex >= SLIDES_DATA.length) currentSlideIndex = SLIDES_DATA.length - 1;
+      renderCurrentSlide();
+    }
+
+    function jumpToSlide(index) {
+      currentSlideIndex = index;
+      renderCurrentSlide();
+    }
+
+    function toggleFullScreen(elementId) {
+      const el = document.getElementById(elementId);
+      if (!document.fullscreenElement) {
+        el.requestFullscreen().catch(err => {
+          showToast(`Error al intentar pantalla completa: ${err.message}`, 'error');
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // =========================================================================
+    // (3) REPOSITORIO MULTIMEDIA (IMÁGENES, VIDEOS, QR, EXCEL)
+    // =========================================================================
+    function switchRepoSubTab(tab) {
+      currentRepoSubTab = tab;
+      const subTabs = {
+        images: { panel: 'repoSubPanelImages', btn: 'repoSubTabBtnImages' },
+        videos: { panel: 'repoSubPanelVideos', btn: 'repoSubTabBtnVideos' },
+        qr: { panel: 'repoSubPanelQR', btn: 'repoSubTabBtnQR' },
+        excel: { panel: 'repoSubPanelExcel', btn: 'repoSubTabBtnExcel' }
+      };
+
+      Object.keys(subTabs).forEach(k => {
+        const item = subTabs[k];
+        const panel = document.getElementById(item.panel);
+        const btn = document.getElementById(item.btn);
+        if (!panel || !btn) return;
+
+        if (k === tab) {
+          panel.classList.remove('hidden');
+          btn.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-marino text-white shadow-xs flex items-center gap-2';
+        } else {
+          panel.classList.add('hidden');
+          btn.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-white text-slate-700 border border-vainilla-border hover:bg-marino-soft flex items-center gap-2';
+        }
+      });
+
+      if (tab === 'images') renderImagesGallery();
+      if (tab === 'qr') renderQRCardsGrid();
+    }
+
+    function renderRepoContent() {
+      switchRepoSubTab(currentRepoSubTab);
+    }
+
+    function addCustomVideo() {
+      const input = document.getElementById('customVideoInput');
+      const val = input.value.trim();
+      if (!val) {
+        showToast('Pega un enlace de YouTube o ID de video', 'info');
+        return;
+      }
+
+      // Extraer ID de YouTube
+      let videoId = val;
+      const match = val.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      if (match && match[1]) {
+        videoId = match[1];
+      }
+
+      const container = document.getElementById('customVideosContainer');
+      container.classList.remove('hidden');
+
+      const card = document.createElement('div');
+      card.className = 'bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs space-y-2';
+      card.innerHTML = `
+        <div class="relative pb-[56.25%] h-0 rounded-xl overflow-hidden bg-slate-900 border border-vainilla-border">
+          <iframe class="absolute top-0 left-0 w-full h-full"
+            src="https://www.youtube-nocookie.com/embed/${videoId}"
+            title="Video agregado"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-xs font-bold text-marino">Video Personalizado</span>
+          <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener noreferrer"
+            class="text-xs text-marino font-semibold hover:underline">Ver en YouTube ↗</a>
+        </div>
+      `;
+      container.appendChild(card);
+      input.value = '';
+      showToast('¡Video cargado con éxito en la videoteca!', 'success');
+    }
+
+    let currentImageSectionFilter = 'all';
+
+    function filterImagesBySection(section) {
+      currentImageSectionFilter = section;
+      const filters = ['all', 'costumbres', 'gastronomia', 'musica_destrezas'];
+      filters.forEach(f => {
+        const btn = document.getElementById(`imgFilterBtn-${f}`);
+        if (!btn) return;
+        if (f === section) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition bg-marino text-white shadow-2xs';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-vainilla border border-vainilla-border text-slate-700 hover:bg-white';
+        }
+      });
+      renderImagesGallery();
+    }
+
+    function renderImagesGallery() {
+      const grid = document.getElementById('imagesGalleryGrid');
+      let items = IMAGES_DATA;
+      if (currentImageSectionFilter !== 'all') {
+        items = IMAGES_DATA.filter(img => img.section === currentImageSectionFilter);
+      }
+
+      grid.innerHTML = items.map(img => `
+        <article class="group bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col justify-between gap-3 hover:border-marino/50 transition">
+          <div class="space-y-3">
+            <!-- Imagen con efecto zoom suave -->
+            <div class="relative overflow-hidden rounded-xl bg-vainilla border border-vainilla-border h-44 flex items-center justify-center">
+              <img src="${img.src}" alt="${escapeHTML(img.title)}"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy" />
+              <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-marino text-white shadow-xs">
+                ${escapeHTML(img.sectionName)}
+              </span>
+            </div>
+
+            <!-- Datos pedagógicos -->
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-menta block mb-0.5">
+                ${escapeHTML(img.linkedActivity)}
+              </span>
+              <h4 class="text-sm font-bold text-marino leading-snug">${escapeHTML(img.title)}</h4>
+              <p class="text-xs text-slate-500 font-medium mb-1">${escapeHTML(img.subtitle)}</p>
+              <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">${escapeHTML(img.description)}</p>
+            </div>
+
+            <div class="bg-vainilla p-2.5 rounded-xl border border-vainilla-border text-[11px] text-slate-600 leading-snug">
+              <strong class="text-marino">Apoyo DUA:</strong> ${escapeHTML(img.pedagogicalTip)}
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-vainilla-border flex items-center justify-between gap-2">
+            <button onclick="openImageLightbox('${escapeHTML(img.id)}')"
+              class="flex-1 py-1.5 px-3 rounded-lg bg-marino hover:bg-marino-light text-white text-xs font-semibold transition text-center shadow-2xs">
+              Ver en Grande (HD)
+            </button>
+
+            <button onclick="speakText('${escapeHTML(img.title)}. ${escapeHTML(img.description)}')"
+              class="p-2 rounded-lg bg-vainilla border border-vainilla-border hover:bg-marino-soft text-marino text-xs font-bold transition shrink-0"
+              title="Escuchar audio explicativo">
+              🔊
+            </button>
+
+            <a href="${img.src}" download="${escapeHTML(img.title)}.jpg"
+              class="p-2 rounded-lg bg-vainilla border border-vainilla-border hover:bg-marino-soft text-slate-600 hover:text-marino text-xs font-semibold transition shrink-0"
+              title="Descargar imagen en alta resolución">
+              ⬇️
+            </a>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function openImageLightbox(imgId) {
+      const img = IMAGES_DATA.find(i => i.id === imgId);
+      if (!img) return;
+
+      document.getElementById('lightboxTitle').textContent = img.title;
+      document.getElementById('lightboxSubtitle').textContent = `${img.subtitle} · ${img.linkedActivity}`;
+      document.getElementById('lightboxCategory').textContent = img.sectionName;
+      document.getElementById('lightboxDescription').textContent = img.description;
+      document.getElementById('lightboxTip').innerHTML = `<strong>💡 Apoyo Pedagógico para el Aula (DUA):</strong> ${escapeHTML(img.pedagogicalTip)}`;
+
+      const imgEl = document.getElementById('lightboxImg');
+      imgEl.src = img.src;
+      imgEl.alt = img.title;
+
+      const downloadBtn = document.getElementById('lightboxDownloadBtn');
+      downloadBtn.href = img.src;
+      downloadBtn.download = `${img.title.replace(/\s+/g, '_')}.jpg`;
+
+      const speechBtn = document.getElementById('lightboxSpeechBtn');
+      speechBtn.onclick = () => {
+        speakText(`${img.title}. ${img.description}. Orientación pedagógica: ${img.pedagogicalTip}`);
+      };
+
+      document.getElementById('imageLightboxModal').classList.remove('hidden');
+    }
+
+    function closeImageLightbox() {
+      document.getElementById('imageLightboxModal').classList.add('hidden');
+    }
+
+    function renderQRCardsGrid() {
+      const grid = document.getElementById('qrCardsGrid');
+      grid.innerHTML = ACTIVITIES_DATA.map(act => {
+        const domId = `qr-repo-box-${act.id}`;
+        return `
+          <div class="bg-white rounded-2xl border border-vainilla-border p-4 shadow-xs flex flex-col items-center text-center justify-between gap-3">
+            <div class="w-full flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full bg-marino text-white text-[11px] font-bold">Actividad ${act.order}</span>
+              <span class="text-[11px] font-semibold text-slate-500">${escapeHTML(act.platform)}</span>
+            </div>
+
+            <h4 class="text-xs sm:text-sm font-bold text-marino leading-snug line-clamp-2">${escapeHTML(act.title)}</h4>
+
+            <div id="${domId}" class="p-3 bg-vainilla rounded-xl border border-vainilla-border shadow-2xs flex items-center justify-center min-h-[160px] min-w-[160px]"></div>
+
+            <div class="w-full flex flex-wrap gap-2 pt-1">
+              <button onclick="downloadElementQR('${domId}', 'QR_${act.order}_${escapeHTML(act.title)}')"
+                class="flex-1 py-1.5 px-3 rounded-xl bg-marino hover:bg-marino-light text-white text-xs font-semibold transition">
+                Descargar PNG
+              </button>
+              <button onclick="openActivityQrZoom('${escapeHTML(act.id)}')"
+                class="py-1.5 px-3 rounded-xl bg-vainilla border border-vainilla-border hover:bg-white text-marino text-xs font-semibold transition">
+                Ampliar
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      setTimeout(() => {
+        ACTIVITIES_DATA.forEach(act => {
+          const el = document.getElementById(`qr-repo-box-${act.id}`);
+          if (el) renderQRCodeInto(el, act.url, 135);
+        });
+      }, 20);
+    }
+
+    function renderQRCodeInto(containerEl, text, size = 150) {
+      containerEl.innerHTML = '';
+      try {
+        new QRCode(containerEl, {
+          text: text,
+          width: size,
+          height: size,
+          colorDark: '#24527A',
+          colorLight: '#FFFFFF',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (e) {
+        containerEl.innerHTML = `<p class="text-xs text-coral">Error al generar QR</p>`;
+      }
+    }
+
+    function downloadElementQR(containerId, filenameBase) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const cleanName = filenameBase.replace(/[^a-zA-Z0-9-_áéíóúÁÉÍÓÚñÑ ]/g, '').trim().replace(/\s+/g, '_') || 'codigo_qr';
+      const canvas = container.querySelector('canvas');
+      const img = container.querySelector('img');
+
+      let dataUrl = null;
+      if (canvas) {
+        dataUrl = canvas.toDataURL('image/png');
+      } else if (img && img.src) {
+        dataUrl = img.src;
+      }
+
+      if (!dataUrl) {
+        showToast('No se encontró imagen para descargar', 'error');
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${cleanName}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Código QR descargado en PNG');
+    }
+
+    function openActivityQrZoom(actId) {
+      const act = ACTIVITIES_DATA.find(a => a.id === actId);
+      if (!act) return;
+
+      const modal = document.getElementById('qrZoomModal');
+      const container = document.getElementById('qrZoomContainer');
+      document.getElementById('qrZoomTitle').textContent = `${act.order}. ${act.title}`;
+      document.getElementById('qrZoomUrlText').textContent = act.url;
+
+      renderQRCodeInto(container, act.url, 210);
+
+      document.getElementById('qrZoomDownloadBtn').onclick = () => {
+        downloadElementQR('qrZoomContainer', `QR_${act.order}_${act.title}`);
+      };
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeQrZoomModal() {
+      document.getElementById('qrZoomModal').classList.add('hidden');
+    }
+
+    function downloadAllQRsZipNotice() {
+      window.print();
+    }
+
+    // =========================================================================
+    // SECCIÓN 4: MODO ESTUDIANTE (FOCO ATENCIONAL PARA TADEO)
+    // =========================================================================
+    function renderStudentFocusMode() {
+      const card = document.getElementById('studentActivityCard');
+      const dotsContainer = document.getElementById('studentProgressDots');
+
+      if (currentStudentActivityIndex < 0) currentStudentActivityIndex = 0;
+      if (currentStudentActivityIndex >= ACTIVITIES_DATA.length) currentStudentActivityIndex = ACTIVITIES_DATA.length - 1;
+
+      const act = ACTIVITIES_DATA[currentStudentActivityIndex];
+      const isCompleted = act.status === 'Completado';
+
+      document.getElementById('studentStepCounter').textContent = `${currentStudentActivityIndex + 1} de ${ACTIVITIES_DATA.length}`;
+
+      // Puntos de avance
+      dotsContainer.innerHTML = ACTIVITIES_DATA.map((a, idx) => {
+        const isCurrent = idx === currentStudentActivityIndex;
+        const isDone = a.status === 'Completado';
+        const bg = isDone ? 'bg-menta' : isCurrent ? 'bg-marino' : 'bg-vainilla-border';
+        const ring = isCurrent ? 'ring-2 ring-marino ring-offset-2' : '';
+        return `
+          <button onclick="jumpToStudentActivity(${idx})"
+            aria-label="Ir a actividad ${idx + 1}"
+            class="h-3.5 flex-1 rounded-full transition-all ${bg} ${ring}">
+          </button>
+        `;
+      }).join('');
+
+      const qrBoxId = `student-qr-box-${act.id}`;
+      card.innerHTML = `
+        <div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
+          
+          <div class="space-y-4 flex-1 text-center md:text-left">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-vainilla border border-vainilla-border text-xs font-bold text-marino">
+              <span>Paso ${act.order}</span>
+              <span>·</span>
+              <span>${escapeHTML(act.platform)}</span>
+              <span>·</span>
+              <span>${act.icon || '🎯'}</span>
+            </div>
+
+            <h3 class="text-2xl sm:text-3xl font-bold text-marino leading-tight">
+              ${escapeHTML(act.title)}
+            </h3>
+
+            <div class="bg-vainilla rounded-2xl p-4 sm:p-5 border border-vainilla-border space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">¿Qué tengo que hacer?</span>
+                <button onclick="speakText('${escapeHTML(act.description)}')"
+                  class="text-xs font-bold text-marino bg-white px-2.5 py-1 rounded-lg border border-vainilla-border hover:bg-marino hover:text-white transition">
+                  🔊 Escuchar
+                </button>
+              </div>
+              <p class="text-base sm:text-lg text-slate-800 leading-relaxed font-medium">
+                ${escapeHTML(act.description)}
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+              <a href="${escapeHTML(act.url)}" target="_blank" rel="noopener noreferrer"
+                onclick="markActivityInProgress('${escapeHTML(act.id)}')"
+                class="flex-1 py-3.5 px-6 rounded-2xl bg-marino hover:bg-marino-light text-white font-bold text-base text-center shadow-xs transition flex items-center justify-center gap-2">
+                <span>Jugar Ahora</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </a>
+
+              <button onclick="toggleStudentActivityCompleted('${escapeHTML(act.id)}')"
+                class="py-3.5 px-5 rounded-2xl font-bold text-sm sm:text-base border-2 transition flex items-center justify-center gap-2 ${
+                  isCompleted
+                    ? 'bg-menta text-white border-menta'
+                    : 'bg-menta-soft text-menta border-menta/30 hover:bg-menta hover:text-white'
+                }">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>${isCompleted ? '¡Completada!' : 'Marcar Terminada'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-vainilla rounded-2xl border border-vainilla-border p-4 flex flex-col items-center text-center shrink-0 w-full md:w-56">
+            <p class="text-xs font-bold uppercase tracking-wider text-marino mb-2">Escanear con Tablet</p>
+            <div id="${qrBoxId}" class="p-3 bg-white rounded-xl border border-vainilla-border shadow-2xs flex items-center justify-center min-h-[160px] min-w-[160px]"></div>
+            <p class="text-xs text-slate-500 mt-2">Apunta la cámara al código QR</p>
+          </div>
+
+        </div>
+      `;
+
+      setTimeout(() => {
+        const qrEl = document.getElementById(qrBoxId);
+        if (qrEl) renderQRCodeInto(qrEl, act.url, 140);
+      }, 10);
+
+      document.getElementById('btnStudentPrev').disabled = currentStudentActivityIndex === 0;
+      document.getElementById('btnStudentNext').disabled = currentStudentActivityIndex === ACTIVITIES_DATA.length - 1;
+    }
+
+    function navigateStudentActivity(step) {
+      currentStudentActivityIndex += step;
+      renderStudentFocusMode();
+    }
+
+    function jumpToStudentActivity(index) {
+      currentStudentActivityIndex = index;
+      renderStudentFocusMode();
+    }
+
+    function markActivityInProgress(actId) {
+      const act = ACTIVITIES_DATA.find(a => a.id === actId);
+      if (act && act.status === 'Pendiente') {
+        act.status = 'En progreso';
+      }
+    }
+
+    function toggleStudentActivityCompleted(actId) {
+      const act = ACTIVITIES_DATA.find(a => a.id === actId);
+      if (!act) return;
+
+      if (act.status === 'Completado') {
+        act.status = 'Pendiente';
+        showToast('Actividad marcada como pendiente', 'info');
+      } else {
+        act.status = 'Completado';
+        triggerPositiveReinforcement();
+        showToast(`¡Excelente trabajo, Tadeo! Terminaste "${act.title}"`, 'success');
+      }
+
+      renderStudentFocusMode();
+    }
+
+    // Refuerzo positivo festivo con Confeti (ideal para motivación en educ. especial)
+    function triggerPositiveReinforcement() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#24527A', '#2F855A', '#D97706', '#D96B43']
+        });
+      }
+    }
+
+    // =========================================================================
+    // ACCESIBILIDAD FONÉTICA (SÍNTESIS DE VOZ WEB SPEECH API)
+    // =========================================================================
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) {
+        showToast('Tu navegador no soporta síntesis de voz', 'info');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-AR';
+      utterance.rate = 0.95; // Ligeramente pausado para comprensión clara
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakPedagogicalSummary() {
+      const summary = "Propuesta final de Tecnología Aplicada a la Educación Especial para Tadeo. Tema: 10 de Noviembre, Día de la Tradición. Objetivos: Identificar las principales tradiciones argentinas y reconocer su importancia cultural mediante cinco actividades gamificadas en Wordwall y Canva.";
+      speakText(summary);
+      showToast('Reproduciendo resumen fonético...');
+    }
+
+    // =========================================================================
+    // EXPORTACIÓN A FORMATO WORD (.DOC) REQUERIMIENTO DEL PIZARRÓN (1)
+    // =========================================================================
+    function exportToWordDoc() {
+      const content = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+          <meta charset='utf-8'>
+          <title>Propuesta Final - Garcia e Ibañez</title>
+          <style>
+            body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; }
+            h1 { font-size: 16pt; color: #183854; text-align: center; }
+            h2 { font-size: 13pt; color: #24527A; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #EAF2F8; color: #183854; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h1>TRABAJO FINAL: PORTFOLIO Y REPOSITORIO DIGITAL</h1>
+          <p style="text-align:center;"><strong>Materia:</strong> Tecnología Aplicada a la Educ. Especial · <strong>Curso:</strong> 3º Primera</p>
+          <p style="text-align:center;"><strong>Estudiantes:</strong> García, Fabio e Ibáñez, Federico · <strong>Profesora:</strong> Sánchez, Adriana</p>
+          <p style="text-align:center;"><strong>Escuela Normal Gral. Manuel Belgrano - 2026</strong></p>
+          <hr/>
+
+          <h2>1. Destinatario y Justificación Pedagógica</h2>
+          <p><strong>Estudiante:</strong> Tadeo (6.º grado de Nivel Primario)</p>
+          <p><strong>Diagnóstico:</strong> Discapacidad intelectual leve.</p>
+          <p><strong>Apoyos Atencionales:</strong> A pesar de su condición, Tadeo no tiene necesidades pedagógicas de contenido; solo requiere apoyos específicos para sostener su atención (suele perderla con facilidad). Se implementa secuenciación de a una actividad por vez, consignas breves y reducción de distractores.</p>
+
+          <h2>2. Marco Temático y Objetivos</h2>
+          <p><strong>Tema:</strong> 10 de Noviembre – Día de la Tradición.</p>
+          <p><strong>Aplicaciones Web:</strong> Wordwall.net y Canva.com</p>
+          <p><strong>Objetivos:</strong></p>
+          <ul>
+            <li>Identificar las principales tradiciones de Argentina.</li>
+            <li>Reconocer su importancia cultural.</li>
+          </ul>
+
+          <h2>3. Secuencia Didáctica de Actividades</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nº</th>
+                <th>Nombre de la Actividad</th>
+                <th>Plataforma</th>
+                <th>Consigna y Propósito</th>
+                <th>Enlace Web</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ACTIVITIES_DATA.map(act => `
+                <tr>
+                  <td>${act.order}</td>
+                  <td><strong>${escapeHTML(act.title)}</strong></td>
+                  <td>${escapeHTML(act.platform)}</td>
+                  <td>${escapeHTML(act.description)} (${escapeHTML(act.pedagogicalAim)})</td>
+                  <td><a href="${escapeHTML(act.url)}">${escapeHTML(act.url)}</a></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff', content], {
+        type: 'application/msword'
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Propuesta_Final_Garcia_Ibañez_Tadeo.doc';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast('Documento Word (.doc) generado y descargado');
+    }
+
+    // =========================================================================
+    // GESTIÓN NATIVA DE PLANILLAS EXCEL (.XLSX) CON SHEETJS
+    // =========================================================================
+    function exportDataExcel() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Librería de Excel no disponible', 'error');
+        return;
+      }
+
+      const wb = XLSX.utils.book_new();
+
+      // Hoja 1: Alumno
+      const wsAlumno = XLSX.utils.json_to_sheet([
+        {
+          ID_Alumno: 'ALU-01',
+          Nombre_Apellido: 'Tadeo',
+          Grado_Nivel: '6.º grado - Nivel Primario',
+          Diagnostico: 'Discapacidad intelectual leve',
+          Apoyos_Atencion: 'Apoyos para sostener atención; secuenciar de a una actividad por vez.',
+          Tema_Actual: '10 de Noviembre – Día de la Tradición',
+          Objetivos: 'Identificar las principales tradiciones de Argentina; Reconocer su importancia cultural.'
+        }
+      ]);
+      XLSX.utils.book_append_sheet(wb, wsAlumno, 'Alumno');
+
+      // Hoja 2: Actividades
+      const wsAct = XLSX.utils.json_to_sheet(ACTIVITIES_DATA.map(a => ({
+        ID_Actividad: a.id,
+        Orden: a.order,
+        Nombre_Actividad: a.title,
+        Plataforma: a.platform,
+        Enlace_Juego: a.url,
+        Consigna_Proposito: a.description,
+        Apoyo_Atencional: a.attentionSupport,
+        Estado: a.status
+      })));
+      XLSX.utils.book_append_sheet(wb, wsAct, 'Actividades');
+
+      XLSX.writeFile(wb, 'Repositorio_Pedagogico_Tadeo_Tradicion.xlsx');
+      showToast('Planilla Excel (.xlsx) descargada con éxito');
+    }
+
+    function downloadExcelTemplate() {
+      if (typeof XLSX === 'undefined') return;
+      const wb = XLSX.utils.book_new();
+      const wsTemplate = XLSX.utils.json_to_sheet([
+        {
+          ID: 'ACT-01',
+          Orden: 1,
+          Titulo: 'Nombre de la actividad',
+          Plataforma: 'Wordwall / Canva',
+          Enlace_URL: 'https://...',
+          Consigna: 'Consigna clara para el alumno'
+        }
+      ]);
+      XLSX.utils.book_append_sheet(wb, wsTemplate, 'Plantilla');
+      XLSX.writeFile(wb, 'Plantilla_Actividades_Educacion_Especial.xlsx');
+      showToast('Plantilla descargada');
+    }
+
+    function importDataExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(firstSheet);
+          showToast(`Archivo leído: ${json.length} filas detectadas.`, 'info');
+        } catch (err) {
+          showToast('Error al leer el archivo Excel', 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // =========================================================================
+    // NOTIFICACIONES TOAST Y UTILIDADES
+    // =========================================================================
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bg = type === 'error' ? 'bg-coral text-white' : type === 'info' ? 'bg-marino text-white' : 'bg-menta text-white';
+      toast.className = `${bg} pointer-events-auto px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center justify-between gap-3 transition-all`;
+      toast.innerHTML = `
+        <span>${escapeHTML(message)}</span>
+        <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold">✕</button>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => { if (toast.parentElement) toast.remove(); }, 4000);
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Inicialización al cargar la página
+    window.addEventListener('DOMContentLoaded', () => {
+      // Vista inicial: Propuesta Curricular (Word)
+      switchMainView('word');
+    });
+  </script>
+</body>
+</html>
